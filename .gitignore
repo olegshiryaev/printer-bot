@@ -1,0 +1,25 @@
+# Секреты и окружение
+.env
+.env.local
+.env.production
+
+# База данных (если локальная)
+*.db
+*.sqlite3
+
+# Виртуальное окружение и кэши
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Логи и временные файлы
+logs/
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/

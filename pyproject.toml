@@ -1,0 +1,29 @@
+[project]
+name = "printer-bot"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "olegshiryaev",email = "oashiryaev@yandex.ru"}
+]
+readme = "README.md"
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "fastapi (>=0.121.2,<0.122.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "sqlmodel (>=0.0.27,<0.0.28)",
+    "sqlalchemy (>=2.0.44,<3.0.0)",
+    "fastapi-admin (>=1.0.4,<2.0.0)",
+    "tortoise-orm (>=0.25.1,<0.26.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "aiogram (>=3.22.0,<4.0.0)",
+    "sqladmin (>=0.21.0,<0.22.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "pydantic-settings[dotenv] (>=2.12.0,<3.0.0)",
+    "itsdangerous (>=2.2.0,<3.0.0)",
+    "httpx (>=0.28.1,<0.29.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
