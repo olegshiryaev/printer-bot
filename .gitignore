@@ -1,7 +1,7 @@
 # Секреты и окружение
 .env
 .env.local
-.env.production
+.env.prod
 
 # База данных (если локальная)
 *.db

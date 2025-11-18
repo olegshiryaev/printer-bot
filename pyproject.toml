@@ -14,13 +14,18 @@ dependencies = [
     "sqlalchemy (>=2.0.44,<3.0.0)",
     "fastapi-admin (>=1.0.4,<2.0.0)",
     "tortoise-orm (>=0.25.1,<0.26.0)",
-    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "passlib[argon2] (>=1.7.4,<2.0.0)",
     "aiogram (>=3.22.0,<4.0.0)",
     "sqladmin (>=0.21.0,<0.22.0)",
     "python-multipart (>=0.0.20,<0.0.21)",
     "pydantic-settings[dotenv] (>=2.12.0,<3.0.0)",
     "itsdangerous (>=2.2.0,<3.0.0)",
-    "httpx (>=0.28.1,<0.29.0)"
+    "httpx (>=0.28.1,<0.29.0)",
+    "aiocache (>=0.12.3,<0.13.0)",
+    "asyncpg (>=0.30.0,<0.31.0)",
+    "psycopg[binary] (>=3.2.12,<4.0.0)",
+    "redis (>=7.0.1,<8.0.0)",
+    "python-dotenv (>=1.2.1,<2.0.0)"
 ]
 
 

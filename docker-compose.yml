@@ -1,8 +1,36 @@
 version: "3.9"
 
 services:
-  printer-bot:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: printerbot
+      POSTGRES_USER: printerbot
+      POSTGRES_PASSWORD: passdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U printerbot -d printerbot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  app:
     build: .
-    env_file:
-      - .env
-    restart: always
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:

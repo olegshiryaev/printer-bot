@@ -4,7 +4,10 @@ from fastapi import FastAPI, Request, Depends
 from starlette.responses import RedirectResponse
 from app.models import Printer, Cartridge
 from app.database import engine
+from passlib.context import CryptContext
 from app.config import settings
+
+pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
 
 class PrinterAdmin(ModelView, model=Printer):
     column_list = [Printer.id, Printer.name, Printer.cartridges]
@@ -28,8 +31,12 @@ class AdminAuth(AuthenticationBackend):
         username = form.get("username")
         password = form.get("password")
 
-        if username == "admin" and password == settings.ADMIN_SECRET:
-            request.session.update({"admin_logged": True})
+        if not (username and password):
+            return False
+
+        if (username == settings.ADMIN_LOGIN and 
+            pwd_context.verify(password, settings.ADMIN_PASSWORD)):
+            request.session["admin_logged"] = True
             return True
         return False
 
@@ -38,9 +45,7 @@ class AdminAuth(AuthenticationBackend):
         return True
 
     async def authenticate(self, request: Request) -> bool:
-        if request.session.get("admin_logged"):
-            return True
-        return False
+        return request.session.get("admin_logged", False)
 
 
 def init_admin(app: FastAPI):
@@ -48,7 +53,7 @@ def init_admin(app: FastAPI):
         app,
         engine,
         title="PrinterBot Admin",
-        authentication_backend=AdminAuth(secret_key="super-secret-key-for-session"),
+        authentication_backend=AdminAuth(secret_key=settings.ADMIN_SECRET_KEY),
     )
     admin.add_view(PrinterAdmin)
     admin.add_view(CartridgeAdmin)
