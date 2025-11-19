@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     DATABASE_URL: str
     ADMIN_LOGIN: str = "admin"
-    ADMIN_PASSWORD: str
+    ADMIN_PASSWORD_HASH: str
     ADMIN_SECRET_KEY: str
     BOT_TOKEN: str
     API_BASE: str = "http://localhost:8000/api"

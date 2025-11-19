@@ -35,7 +35,7 @@ class AdminAuth(AuthenticationBackend):
             return False
 
         if (username == settings.ADMIN_LOGIN and 
-            pwd_context.verify(password, settings.ADMIN_PASSWORD)):
+            pwd_context.verify(password, settings.ADMIN_PASSWORD_HASH)):
             request.session["admin_logged"] = True
             return True
         return False
