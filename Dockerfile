@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-# Устанавливаем системные зависимости для asyncpg + psycopg2-binary
+# Системные зависимости
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
@@ -8,18 +8,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Копируем только зависимости
+# Копируем только метаданные
 COPY pyproject.toml poetry.lock ./
 
-# Устанавливаем poetry и зависимости
+# Устанавливаем poetry + зависимости БЕЗ установки самого проекта
 RUN pip install --no-cache-dir poetry && \
     poetry config virtualenvs.create false && \
-    poetry install --only main --no-interaction --no-ansi
+    poetry install --only main --no-root --no-interaction --no-ansi
 
 # Копируем код
 COPY . .
 
-# Явно ставим psycopg2-binary (это спасает Render)
+# Явно ставим psycopg2-binary (на всякий случай, даже если используем asyncpg)
 RUN pip install --no-cache-dir psycopg2-binary
 
 EXPOSE 8000
