@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
+from sqlalchemy import text
 from app.config import settings
 
 engine = create_async_engine(
@@ -36,5 +37,5 @@ async def get_session() -> AsyncSession:
 async def health_check_db():
     """Dedicated функция для healthcheck — простая проверка БД."""
     async with async_session_maker() as session:
-        await session.execute("SELECT 1")
+        await session.execute(text("SELECT 1"))
         return True
