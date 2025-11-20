@@ -8,14 +8,14 @@ from app.admin.setup import init_admin
 
 app = FastAPI(title="Printer Cartridge API")
 
-@app.get("/health")
+@app.get("/health", status_code=200)
+@app.head("/health")
 async def health_check():
     try:
         await health_check_db()
         return {"status": "healthy", "service": "printer-bot"}
     except Exception as e:
         return JSONResponse(status_code=500, content={"status": "unhealthy", "error": str(e)})
-
 @app.on_event("startup")
 async def startup_event():
     await create_db_and_tables()
