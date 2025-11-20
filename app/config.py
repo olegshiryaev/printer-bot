@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     ADMIN_SECRET_KEY: str
     BOT_TOKEN: str
     API_BASE: str = "http://localhost:8000/api"
+    ADMIN_TELEGRAM_ID: int = 792320988
+    BACKUP_TIME_HOUR: int = 4
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
