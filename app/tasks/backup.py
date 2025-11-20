@@ -1,66 +1,71 @@
-import asyncio
-import gzip
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
-import asyncpg
 from aiogram import Bot
 from app.config import settings
 
 
+def _clean_db_url(url: str) -> str:
+    """Убирает +asyncpg / +psycopg2, чтобы pg_dump понял URL."""
+    return url.replace("+asyncpg", "").replace("+psycopg2", "")
+
+
 async def create_pg_dump() -> Path:
-    """Создаёт дамп базы через asyncpg (работает в Docker/Render)."""
+    """Делает сжатый дамп через pg_dump (самый надёжный способ)."""
     timestamp = datetime.now().strftime("%Y-%m-%d")
     backup_path = Path("/tmp") / f"backup_{timestamp}.sql.gz"
 
-    # Подключаемся напрямую к БД (как pg_dump, но в коде)
-    conn = await asyncpg.connect(settings.DATABASE_URL.replace("+asyncpg", ""))
-    try:
-        # Получаем весь дамп в виде строк
-        dump = await conn.fetch("SELECT pg_dump('template1', 'postgres')")
-        # Лучше — используем pg_dump через subprocess (самое надёжное)
-    finally:
-        await conn.close()
+    clean_url = _clean_db_url(settings.DATABASE_URL)
 
-    # Самый надёжный способ — subprocess + pg_dump (он уже есть в Render PostgreSQL)
-    import subprocess
+    # pg_dump сразу пишет сжатый файл — не нужно gzip вручную
     result = subprocess.run(
         [
             "pg_dump",
+            "--verbose",
             "--no-owner",
             "--no-acl",
-            "--format=custom",
-            settings.DATABASE_URL.replace("+asyncpg", ""),
+            "--format=custom",      # бинарный компактный формат
+            "--compress=9",         # максимальное сжатие
+            f"--file={backup_path}",  # сразу в /tmp/backup_2025-11-20.sql.gz
+            clean_url,
         ],
         capture_output=True,
-        check=True,
+        text=True,   # чтобы в ошибках видеть текст
     )
-    compressed = gzip.compress(result.stdout)
-    backup_path.write_bytes(compressed)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"pg_dump failed: {result.stderr.strip()}")
+
     return backup_path
 
 
 async def send_daily_backup():
-    """Ежедневный таск — делает бэкап и шлёт тебе в Избранное."""
+    """Ежедневно делает бэкап и шлёт тебе в Telegram."""
     bot = Bot(token=settings.BOT_TOKEN)
     try:
         backup_file = await create_pg_dump()
         await bot.send_document(
-            chat_id=settings.ADMIN_TELEGRAM_ID,  # ← твой Telegram ID
+            chat_id=int(settings.ADMIN_TELEGRAM_ID),   # твой ID из @userinfotip
             document=backup_file.open("rb"),
-            caption=f"Автобэкап базы\n{datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            caption=f"Автобэкап базы\n{datetime.now():%Y-%m-%d %H:%M}",
         )
         print(f"Бэкап отправлен: {backup_file.name}")
     except Exception as e:
-        await bot.send_message(settings.ADMIN_TELEGRAM_ID, f"Ошибка бэкапа: {e}")
+        await bot.send_message(
+            chat_id=int(settings.ADMIN_TELEGRAM_ID),
+            text=f"Ошибка бэкапа:\n{e}",
+        )
     finally:
         await bot.session.close()
-        # Удаляем временный файл
+        # Чистим временный файл
         try:
             backup_file.unlink()
         except:
             pass
 
 
+# Для ручного запуска: python -m app.tasks.backup
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(send_daily_backup())
