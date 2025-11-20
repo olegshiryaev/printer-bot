@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlmodel import SQLModel
+from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
 from app.config import settings
 
@@ -30,3 +31,10 @@ async def create_db_and_tables():
 async def get_session() -> AsyncSession:
     async with get_async_session() as session:
         yield session
+
+
+async def health_check_db():
+    """Dedicated функция для healthcheck — простая проверка БД."""
+    async with async_session_maker() as session:
+        await session.execute("SELECT 1")
+        return True
