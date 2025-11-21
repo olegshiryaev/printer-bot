@@ -10,11 +10,34 @@ from app.config import settings
 pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
 
 class PrinterAdmin(ModelView, model=Printer):
+    # Колонки в списке
     column_list = [Printer.id, Printer.name, Printer.cartridges]
+    # Поиск по имени
     column_searchable_list = [Printer.name]
+    # Колонки для просмотра деталей
     column_details_list = [Printer.id, Printer.name, Printer.cartridges]
+    # Поля формы
     form_columns = ["name", "cartridges"]
     page_size = 50
+
+    # Подписи на русском
+    column_labels = {
+        "id": "ID",
+        "name": "Название принтера",
+        "cartridges": "Картриджи"
+    }
+    form_labels = {
+        "name": "Название принтера",
+        "cartridges": "Картриджи"
+    }
+
+    # Форматирование списка связей
+    async def _format_cartridges(self, view, context, model, name):
+        return ", ".join([c.name for c in model.cartridges])
+
+    column_formatters = {
+        "cartridges": _format_cartridges
+    }
 
 
 class CartridgeAdmin(ModelView, model=Cartridge):
@@ -23,6 +46,23 @@ class CartridgeAdmin(ModelView, model=Cartridge):
     column_details_list = [Cartridge.id, Cartridge.name, Cartridge.printers]
     form_columns = ["name", "printers"]
     page_size = 50
+
+    column_labels = {
+        "id": "ID",
+        "name": "Название картриджа",
+        "printers": "Принтеры"
+    }
+    form_labels = {
+        "name": "Название картриджа",
+        "printers": "Принтеры"
+    }
+
+    async def _format_printers(self, view, context, model, name):
+        return ", ".join([p.name for p in model.printers])
+
+    column_formatters = {
+        "printers": _format_printers
+    }
 
 
 class AdminAuth(AuthenticationBackend):
