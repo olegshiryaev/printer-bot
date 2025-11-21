@@ -1,5 +1,5 @@
 import logging
-from httpx import AsyncClient, HTTPStatusError, RequestError
+from httpx import AsyncClient, Limits, HTTPStatusError, RequestError
 
 from .config import settings
 
@@ -8,7 +8,9 @@ logger = logging.getLogger(__name__)
 client = AsyncClient(
     base_url=settings.API_BASE.rstrip("/"),
     timeout=12.0,
-    limits={"max_connections": 100, "max_keepalive": 20},
+    limits=Limits(max_connections=100, max_keepalive_connections=20),
+    # если хочешь ещё строже:
+    # limits=Limits(max_keepalive_connections=20, max_connections=100, keepalive_expiry=30),
 )
 
 
@@ -19,8 +21,6 @@ async def api_get(url: str, params=None):
         return r.json()
     except HTTPStatusError as exc:
         logger.error(f"API error {exc.response.status_code} {url}")
-        if exc.response.status_code >= 500:
-            return {"items": [], "total": 0, "error": "Сервис временно недоступен"}
         return {"items": [], "total": 0}
     except RequestError as exc:
         logger.error(f"Request failed {url}: {exc}")
