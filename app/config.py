@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     API_BASE: str = "http://localhost:8000/api"
     ADMIN_TELEGRAM_ID: int = 792320988
     BACKUP_TIME_HOUR: int = 4
-    REDIS_URL: str = "redis://redis:6379/0"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
