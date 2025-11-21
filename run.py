@@ -4,12 +4,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.config import settings
 from app.tasks.backup import send_daily_backup
 from app.main import app as fastapi_app
-from bot.main import main as bot_main
-
+from bot.main import main as bot_main  # корутина бота
 
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 scheduler.add_job(send_daily_backup, "cron", hour=settings.BACKUP_TIME_HOUR, minute=0)
-
 
 async def run_server():
     config = uvicorn.Config(
@@ -21,15 +19,12 @@ async def run_server():
     server = uvicorn.Server(config)
     await server.serve()
 
-
 async def main():
-    # Запускаем FastAPI и бота параллельно в одном event loop
     scheduler.start()
     await asyncio.gather(
         run_server(),
-        bot_main(),
+        bot_main(),  # запускаем бота параллельно
     )
-
 
 if __name__ == "__main__":
     asyncio.run(main())
