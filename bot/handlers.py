@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 
 from bot.fsm import SearchFSM
-from bot.keyboards import make_results_keyboard, back_to_search_kb
+from bot.keyboards import make_results_kb, back_to_main_kb
 from bot.api import api
 from bot.utils import decode_payload
 from bot.limiter import anti_flood
@@ -53,7 +53,7 @@ async def search_handler(message: Message, state: FSMContext):
 
     if not results:
         await message.answer(
-            "❌ Ничего не найдено.", reply_markup=back_to_search_kb()
+            "❌ Ничего не найдено.", reply_markup=back_to_main_kb()
         )
         return
 
@@ -67,7 +67,7 @@ async def search_handler(message: Message, state: FSMContext):
 
     await message.answer(
         f"🔎 Найдено вариантов: *{len(results)}*\nВыберите нужный:",
-        reply_markup=make_results_keyboard(results),
+        reply_markup=make_results_kb(results),
     )
 
 
@@ -132,7 +132,7 @@ async def show_result(message: Message, item: dict):
     try:
         await message.answer(
             "\n".join(text_lines),
-            reply_markup=back_to_search_kb(),
+            reply_markup=back_to_main_kb(),
         )
     except TelegramBadRequest:
         await message.answer("⚠️ Ошибка вывода сообщения.")
